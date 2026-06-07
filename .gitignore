@@ -1,0 +1,42 @@
+# Build outputs
+/bin/
+/build/
+/outputs
+
+# Object files and native binaries
+*.o
+*.a
+*.so
+*.out
+*.exe
+
+# Linux kernel module build artifacts
+*.ko
+*.mod
+*.mod.c
+*.symvers
+Module.symvers
+modules.order
+.*.cmd
+.tmp_versions/
+
+# Generated filesystem images and logs
+*.img
+*.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Editor and OS noise
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Generated editable report exports.
+# The Markdown source and final PDF are kept in the repository.
+/docs/*.docx
+/docs/*.odt
+/docs/os_report.odt
+/docs/*.html

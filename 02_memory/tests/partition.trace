@@ -1,0 +1,13 @@
+total 128
+alloc A 20
+alloc B 35
+alloc C 15
+free B
+alloc D 18
+alloc E 12
+free A
+alloc F 10
+dump
+free C
+free D
+alloc G 40
