@@ -28,7 +28,6 @@
 - `05_linux_kernel_system/`：内核模块、字符设备、`/proc`、`/sys`、系统调用扩展。
 - `06_sched_perf/`：调度优化、实时调度探测、系统性能测试、并发性能优化。
 - `scripts/run_all_tests.sh`：自动验收脚本。
-- `docs/实验报告.md`：报告素材和验收记录模板。
 
 ## 一键编译与测试
 
