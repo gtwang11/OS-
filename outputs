@@ -1,0 +1,336 @@
+mkdir -p bin build
+make -C 05_linux_kernel_system/hello_module modules
+make[1]: 进入目录“/home/wgt/OS/05_linux_kernel_system/hello_module”
+make -C /lib/modules/6.8.12-oscourse-oscourse/build M=/home/wgt/OS/05_linux_kernel_system/hello_module CC="bash /home/wgt/OS/scripts/kbuild-gcc-wrapper.sh" HOSTCC=gcc modules
+make[2]: 进入目录“/usr/src/linux-headers-6.8.12-oscourse-oscourse”
+make[2]: 离开目录“/usr/src/linux-headers-6.8.12-oscourse-oscourse”
+make[1]: 离开目录“/home/wgt/OS/05_linux_kernel_system/hello_module”
+make -C 05_linux_kernel_system/chardev_proc_sysfs modules
+make[1]: 进入目录“/home/wgt/OS/05_linux_kernel_system/chardev_proc_sysfs”
+make -C /lib/modules/6.8.12-oscourse-oscourse/build M=/home/wgt/OS/05_linux_kernel_system/chardev_proc_sysfs CC="bash /home/wgt/OS/scripts/kbuild-gcc-wrapper.sh" HOSTCC=gcc modules
+make[2]: 进入目录“/usr/src/linux-headers-6.8.12-oscourse-oscourse”
+make[2]: 离开目录“/usr/src/linux-headers-6.8.12-oscourse-oscourse”
+make[1]: 离开目录“/home/wgt/OS/05_linux_kernel_system/chardev_proc_sysfs”
+bash scripts/run_all_tests.sh
+== scheduling ==
+COMPARE algorithms=8 quantum=2
+algo avg_turnaround avg_waiting avg_response throughput context_switches
+fcfs 10.200 5.800 5.800 0.227 4
+sjf 9.600 5.200 5.200 0.227 4
+srtf 8.800 4.400 2.400 0.227 6
+rr 11.600 7.200 2.200 0.227 11
+priority 10.800 6.400 6.400 0.227 4
+priorityp 10.400 6.000 4.400 0.227 5
+hrrn 9.600 5.200 5.200 0.227 4
+arr 10.800 6.400 4.600 0.227 5
+ANALYSIS best_avg_waiting=srtf(4.400) best_avg_turnaround=srtf(8.800)
+ANALYSIS 抢占式算法通常改善响应时间但增加切换次数；SJF/SRTF依赖CPU时间预测；RR/ARR适合交互任务。
+ALGORITHM rr quantum=2
+GANTT
+  [0,2) P1
+  [2,4) P2
+  [4,6) P1
+  [6,7) P3
+  [7,9) P2
+  [9,11) P4
+  [11,13) P5
+  [13,15) P1
+  [15,17) P4
+  [17,19) P5
+  [19,20) P1
+  [20,22) P5
+RESULTS
+pid arrival burst priority start finish turnaround waiting response
+P1 0 7 3 0 20 20 13 0
+P2 2 4 1 2 9 7 3 0
+P3 4 1 4 6 7 3 2 2
+P4 5 4 2 9 17 12 8 4
+P5 6 6 5 11 22 16 10 5
+SUMMARY
+avg_turnaround=11.600
+avg_waiting=7.200
+avg_response=2.200
+throughput=0.227 jobs/unit
+context_switches=11
+ANALYSIS RR通过时间片改善交互响应；时间片过小会增加上下文切换，过大则退化为FCFS。
+== memory ==
+INIT total=128 algo=ff
+MEMORY | [0,128) FREE:FREE size=128
+STEP 1 alloc A 20 -> OK start=0
+MEMORY | [0,20) ALLOC:A size=20 | [20,128) FREE:FREE size=108
+STEP 2 alloc B 35 -> OK start=20
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) ALLOC:B size=35 | [55,128) FREE:FREE size=73
+STEP 3 alloc C 15 -> OK start=55
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) ALLOC:B size=35 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 4 free B -> OK
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) FREE:FREE size=35 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 5 alloc D 18 -> OK start=20
+MEMORY | [0,20) ALLOC:A size=20 | [20,38) ALLOC:D size=18 | [38,55) FREE:FREE size=17 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 6 alloc E 12 -> OK start=38
+MEMORY | [0,20) ALLOC:A size=20 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 7 free A -> OK
+MEMORY | [0,20) FREE:FREE size=20 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 8 alloc F 10 -> OK start=0
+MEMORY | [0,10) ALLOC:F size=10 | [10,20) FREE:FREE size=10 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 9 dump
+MEMORY | [0,10) ALLOC:F size=10 | [10,20) FREE:FREE size=10 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 10 free C -> OK
+MEMORY | [0,10) ALLOC:F size=10 | [10,20) FREE:FREE size=10 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,128) FREE:FREE size=78
+STEP 11 free D -> OK
+MEMORY | [0,10) ALLOC:F size=10 | [10,38) FREE:FREE size=28 | [38,50) ALLOC:E size=12 | [50,128) FREE:FREE size=78
+STEP 12 alloc G 40 -> OK start=50
+MEMORY | [0,10) ALLOC:F size=10 | [10,38) FREE:FREE size=28 | [38,50) ALLOC:E size=12 | [50,90) ALLOC:G size=40 | [90,128) FREE:FREE size=38
+SUMMARY total=128 allocations=7 frees=4 failures=0 free=66 largest_free=38 external_fragmentation=28 free_blocks=2
+ANALYSIS FF速度快但碎片位置依赖请求顺序；BF减少单次剩余空间但可能制造小碎片；WF保留中等孔洞但会消耗最大空闲块。
+INIT total=128 algo=bf
+MEMORY | [0,128) FREE:FREE size=128
+STEP 1 alloc A 20 -> OK start=0
+MEMORY | [0,20) ALLOC:A size=20 | [20,128) FREE:FREE size=108
+STEP 2 alloc B 35 -> OK start=20
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) ALLOC:B size=35 | [55,128) FREE:FREE size=73
+STEP 3 alloc C 15 -> OK start=55
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) ALLOC:B size=35 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 4 free B -> OK
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) FREE:FREE size=35 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 5 alloc D 18 -> OK start=20
+MEMORY | [0,20) ALLOC:A size=20 | [20,38) ALLOC:D size=18 | [38,55) FREE:FREE size=17 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 6 alloc E 12 -> OK start=38
+MEMORY | [0,20) ALLOC:A size=20 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 7 free A -> OK
+MEMORY | [0,20) FREE:FREE size=20 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 8 alloc F 10 -> OK start=0
+MEMORY | [0,10) ALLOC:F size=10 | [10,20) FREE:FREE size=10 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 9 dump
+MEMORY | [0,10) ALLOC:F size=10 | [10,20) FREE:FREE size=10 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,55) FREE:FREE size=5 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 10 free C -> OK
+MEMORY | [0,10) ALLOC:F size=10 | [10,20) FREE:FREE size=10 | [20,38) ALLOC:D size=18 | [38,50) ALLOC:E size=12 | [50,128) FREE:FREE size=78
+STEP 11 free D -> OK
+MEMORY | [0,10) ALLOC:F size=10 | [10,38) FREE:FREE size=28 | [38,50) ALLOC:E size=12 | [50,128) FREE:FREE size=78
+STEP 12 alloc G 40 -> OK start=50
+MEMORY | [0,10) ALLOC:F size=10 | [10,38) FREE:FREE size=28 | [38,50) ALLOC:E size=12 | [50,90) ALLOC:G size=40 | [90,128) FREE:FREE size=38
+SUMMARY total=128 allocations=7 frees=4 failures=0 free=66 largest_free=38 external_fragmentation=28 free_blocks=2
+ANALYSIS FF速度快但碎片位置依赖请求顺序；BF减少单次剩余空间但可能制造小碎片；WF保留中等孔洞但会消耗最大空闲块。
+INIT total=128 algo=wf
+MEMORY | [0,128) FREE:FREE size=128
+STEP 1 alloc A 20 -> OK start=0
+MEMORY | [0,20) ALLOC:A size=20 | [20,128) FREE:FREE size=108
+STEP 2 alloc B 35 -> OK start=20
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) ALLOC:B size=35 | [55,128) FREE:FREE size=73
+STEP 3 alloc C 15 -> OK start=55
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) ALLOC:B size=35 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 4 free B -> OK
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) FREE:FREE size=35 | [55,70) ALLOC:C size=15 | [70,128) FREE:FREE size=58
+STEP 5 alloc D 18 -> OK start=70
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) FREE:FREE size=35 | [55,70) ALLOC:C size=15 | [70,88) ALLOC:D size=18 | [88,128) FREE:FREE size=40
+STEP 6 alloc E 12 -> OK start=88
+MEMORY | [0,20) ALLOC:A size=20 | [20,55) FREE:FREE size=35 | [55,70) ALLOC:C size=15 | [70,88) ALLOC:D size=18 | [88,100) ALLOC:E size=12 | [100,128) FREE:FREE size=28
+STEP 7 free A -> OK
+MEMORY | [0,55) FREE:FREE size=55 | [55,70) ALLOC:C size=15 | [70,88) ALLOC:D size=18 | [88,100) ALLOC:E size=12 | [100,128) FREE:FREE size=28
+STEP 8 alloc F 10 -> OK start=0
+MEMORY | [0,10) ALLOC:F size=10 | [10,55) FREE:FREE size=45 | [55,70) ALLOC:C size=15 | [70,88) ALLOC:D size=18 | [88,100) ALLOC:E size=12 | [100,128) FREE:FREE size=28
+STEP 9 dump
+MEMORY | [0,10) ALLOC:F size=10 | [10,55) FREE:FREE size=45 | [55,70) ALLOC:C size=15 | [70,88) ALLOC:D size=18 | [88,100) ALLOC:E size=12 | [100,128) FREE:FREE size=28
+STEP 10 free C -> OK
+MEMORY | [0,10) ALLOC:F size=10 | [10,70) FREE:FREE size=60 | [70,88) ALLOC:D size=18 | [88,100) ALLOC:E size=12 | [100,128) FREE:FREE size=28
+STEP 11 free D -> OK
+MEMORY | [0,10) ALLOC:F size=10 | [10,88) FREE:FREE size=78 | [88,100) ALLOC:E size=12 | [100,128) FREE:FREE size=28
+STEP 12 alloc G 40 -> OK start=10
+MEMORY | [0,10) ALLOC:F size=10 | [10,50) ALLOC:G size=40 | [50,88) FREE:FREE size=38 | [88,100) ALLOC:E size=12 | [100,128) FREE:FREE size=28
+SUMMARY total=128 allocations=7 frees=4 failures=0 free=66 largest_free=38 external_fragmentation=28 free_blocks=2
+ANALYSIS FF速度快但碎片位置依赖请求顺序；BF减少单次剩余空间但可能制造小碎片；WF保留中等孔洞但会消耗最大空闲块。
+PAGING algo=fifo frames=3 refs=13
+REF 1 page=7 FAULT frames=[7][_][_]
+REF 2 page=0 FAULT frames=[7][0][_]
+REF 3 page=1 FAULT frames=[7][0][1]
+REF 4 page=2 FAULT evict=7 frames=[2][0][1]
+REF 5 page=0 HIT frames=[2][0][1]
+REF 6 page=3 FAULT evict=0 frames=[2][3][1]
+REF 7 page=0 FAULT evict=1 frames=[2][3][0]
+REF 8 page=4 FAULT evict=2 frames=[4][3][0]
+REF 9 page=2 FAULT evict=3 frames=[4][2][0]
+REF 10 page=3 FAULT evict=0 frames=[4][2][3]
+REF 11 page=0 FAULT evict=4 frames=[0][2][3]
+REF 12 page=3 HIT frames=[0][2][3]
+REF 13 page=2 HIT frames=[0][2][3]
+SUMMARY refs=13 frames=3 faults=10 hits=3 fault_rate=0.769
+ANALYSIS FIFO实现简单但可能出现Belady异常；LRU利用局部性；OPT是理论最优基准；Clock以较低成本近似LRU。
+PAGING algo=lru frames=3 refs=13
+REF 1 page=7 FAULT frames=[7][_][_]
+REF 2 page=0 FAULT frames=[7][0][_]
+REF 3 page=1 FAULT frames=[7][0][1]
+REF 4 page=2 FAULT evict=7 frames=[2][0][1]
+REF 5 page=0 HIT frames=[2][0][1]
+REF 6 page=3 FAULT evict=1 frames=[2][0][3]
+REF 7 page=0 HIT frames=[2][0][3]
+REF 8 page=4 FAULT evict=2 frames=[4][0][3]
+REF 9 page=2 FAULT evict=3 frames=[4][0][2]
+REF 10 page=3 FAULT evict=0 frames=[4][3][2]
+REF 11 page=0 FAULT evict=4 frames=[0][3][2]
+REF 12 page=3 HIT frames=[0][3][2]
+REF 13 page=2 HIT frames=[0][3][2]
+SUMMARY refs=13 frames=3 faults=9 hits=4 fault_rate=0.692
+ANALYSIS FIFO实现简单但可能出现Belady异常；LRU利用局部性；OPT是理论最优基准；Clock以较低成本近似LRU。
+PAGING algo=opt frames=3 refs=13
+REF 1 page=7 FAULT frames=[7][_][_]
+REF 2 page=0 FAULT frames=[7][0][_]
+REF 3 page=1 FAULT frames=[7][0][1]
+REF 4 page=2 FAULT evict=7 frames=[2][0][1]
+REF 5 page=0 HIT frames=[2][0][1]
+REF 6 page=3 FAULT evict=1 frames=[2][0][3]
+REF 7 page=0 HIT frames=[2][0][3]
+REF 8 page=4 FAULT evict=0 frames=[2][4][3]
+REF 9 page=2 HIT frames=[2][4][3]
+REF 10 page=3 HIT frames=[2][4][3]
+REF 11 page=0 FAULT evict=4 frames=[2][0][3]
+REF 12 page=3 HIT frames=[2][0][3]
+REF 13 page=2 HIT frames=[2][0][3]
+SUMMARY refs=13 frames=3 faults=7 hits=6 fault_rate=0.538
+ANALYSIS FIFO实现简单但可能出现Belady异常；LRU利用局部性；OPT是理论最优基准；Clock以较低成本近似LRU。
+PAGING algo=clock frames=3 refs=13
+REF 1 page=7 FAULT frames=[7][_][_]
+REF 2 page=0 FAULT frames=[7][0][_]
+REF 3 page=1 FAULT frames=[7][0][1]
+REF 4 page=2 FAULT evict=7 frames=[2][0][1]
+REF 5 page=0 HIT frames=[2][0][1]
+REF 6 page=3 FAULT evict=1 frames=[2][0][3]
+REF 7 page=0 HIT frames=[2][0][3]
+REF 8 page=4 FAULT evict=2 frames=[4][0][3]
+REF 9 page=2 FAULT evict=0 frames=[4][2][3]
+REF 10 page=3 HIT frames=[4][2][3]
+REF 11 page=0 FAULT evict=3 frames=[4][2][0]
+REF 12 page=3 FAULT evict=4 frames=[3][2][0]
+REF 13 page=2 HIT frames=[3][2][0]
+SUMMARY refs=13 frames=3 faults=9 hits=4 fault_rate=0.692
+ANALYSIS FIFO实现简单但可能出现Belady异常；LRU利用局部性；OPT是理论最优基准；Clock以较低成本近似LRU。
+== synchronization ==
+PRODUCER_CONSUMER producers=2 consumers=2 items=12 buffer=4
+producer=0 produced item=1 buffer_tail=1
+producer=1 produced item=2 buffer_tail=2
+consumer=0 consumed item=1 buffer_head=1
+consumer=1 consumed item=2 buffer_head=2
+producer=0 produced item=3 buffer_tail=3
+producer=1 produced item=4 buffer_tail=0
+consumer=0 consumed item=3 buffer_head=3
+consumer=1 consumed item=4 buffer_head=0
+producer=0 produced item=5 buffer_tail=1
+producer=1 produced item=6 buffer_tail=2
+consumer=0 consumed item=5 buffer_head=1
+consumer=1 consumed item=6 buffer_head=2
+producer=0 produced item=7 buffer_tail=3
+producer=1 produced item=8 buffer_tail=0
+consumer=0 consumed item=7 buffer_head=3
+consumer=1 consumed item=8 buffer_head=0
+producer=0 produced item=9 buffer_tail=1
+producer=1 produced item=10 buffer_tail=2
+producer=0 produced item=11 buffer_tail=3
+consumer=0 consumed item=9 buffer_head=1
+producer=1 produced item=12 buffer_tail=0
+consumer=1 consumed item=10 buffer_head=2
+consumer=0 consumed item=11 buffer_head=3
+consumer=1 consumed item=12 buffer_head=0
+consumer=0 received_stop item=-1 buffer_head=1
+consumer=1 received_stop item=-1 buffer_head=2
+SUMMARY produced=12 consumed=12 duplicates=0 missing=0 result=PASS
+READERS_WRITERS readers=3 writers=2 loops=3 policy=fair_turnstile
+reader=0 loop=1 value=0
+reader=2 loop=1 value=0
+reader=1 loop=1 value=0
+writer=0 loop=1 value=1
+writer=0 loop=2 value=2
+writer=0 loop=3 value=3
+reader=2 loop=2 value=3
+reader=0 loop=2 value=3
+writer=1 loop=1 value=4
+writer=1 loop=2 value=5
+writer=1 loop=3 value=6
+reader=0 loop=3 value=6
+reader=1 loop=2 value=6
+reader=2 loop=3 value=6
+reader=1 loop=3 value=6
+SUMMARY final_value=6 expected=6 reads=9 writes=6 result=PASS
+DINING_PHILOSOPHERS philosophers=5 meals=3 strategy=room_limit_ordered_forks
+philosopher=0 meal=1 forks=0
+philosopher=2 meal=1 forks=2
+philosopher=4 meal=1 forks=0
+philosopher=3 meal=1 forks=3
+philosopher=1 meal=1 forks=1
+philosopher=0 meal=2 forks=0
+philosopher=2 meal=2 forks=2
+philosopher=4 meal=2 forks=0
+philosopher=1 meal=2 forks=1
+philosopher=3 meal=2 forks=3
+philosopher=0 meal=3 forks=0
+philosopher=4 meal=3 forks=0
+philosopher=2 meal=3 forks=2
+philosopher=1 meal=3 forks=1
+philosopher=3 meal=3 forks=3
+EATEN P0=3 P1=3 P2=3 P3=3 P4=3
+SUMMARY expected_each=3 result=PASS
+== mini filesystem ==
+FORMAT image=build/test_outputs/minifs.img blocks=96 block_size=256 data_start=32 data_blocks=64 max_file_bytes=3072
+CREATE alpha.txt -> OK inode=0
+WRITE alpha.txt -> OK bytes=5 blocks=1
+WRITE alpha.txt -> OK bytes=11 blocks=1
+APPEND alpha.txt -> OK appended=6
+READ alpha.txt bytes=11
+hello world
+CREATE beta.txt -> OK inode=1
+WRITE beta.txt -> OK bytes=9 blocks=1
+DELETE beta.txt -> OK freed_inode=1
+LS image=build/test_outputs/minifs.img
+name size blocks
+alpha.txt 11 1
+READTO alpha.txt -> build/test_outputs/minifs_alpha.txt bytes=11
+STAT image=build/test_outputs/minifs.img block_size=256 blocks=96 data_start=32
+SUMMARY files=1/64 data_used=1 data_free=63 metadata_blocks=32 max_file_bytes=3072
+ANALYSIS bitmap中1表示已占用块，0表示空闲块；删除文件会释放直接块并更新空闲空间。
+== extension scheduling/performance ==
+SCHED_OPTIMIZATION input=06_sched_perf/tests/perf_processes.csv quantum=3 jobs=6
+algo avg_turnaround avg_waiting avg_response throughput context_switches
+fcfs 20.000 13.833 13.833 0.162 5
+sjf 17.500 11.333 11.333 0.162 5
+rr 20.500 14.333 4.667 0.162 13
+hrrn_optimized 17.833 11.667 11.667 0.162 5
+adaptive_rr_optimized 21.000 14.833 9.833 0.162 8
+ANALYSIS optimized_algorithms=hrrn_optimized,adaptive_rr_optimized best_avg_waiting=sjf 11.333
+PASS scheduling_optimization_metrics_complete
+REALTIME policy=SCHED_RR priority_range=[1,99] requested_priority=1
+RR_INTERVAL current_sec=0 current_nsec=2000000
+REALTIME_APPLY result=SKIP_PERMISSION_OR_POLICY errno=1 message=Operation not permitted
+REALTIME_WORK duration_ms=30 spin=4562121200465272396
+PASS realtime_policy_probe_complete
+SYSTEM_PERF threads=2 iters_per_thread=100000 wall_sec=0.001127 user_sec=0.001367 sys_sec=0.000000 throughput_iters_per_sec=177419155 checksum=0
+CONTEXT_SWITCH voluntary=1 involuntary=0
+ANALYSIS wall/user/sys时间和上下文切换数可用于判断CPU负载、线程并行度与调度开销。
+PASS system_performance_probe_complete
+CONCURRENCY_OPT threads=4 iters_per_thread=50000 expected=200000
+strategy total seconds throughput_ops_per_sec
+mutex 200000 0.014169 14115445
+atomic 200000 0.004248 47085745
+sharded_local_reduce 200000 0.000492 406809172
+ANALYSIS best_time_strategy=sharded_local_reduce seconds=0.000492; 分片局部累加通过减少共享写竞争优化并发性能。
+SUMMARY result=PASS
+== kernel modules compile-only verification ==
+filename:       /home/wgt/OS/05_linux_kernel_system/hello_module/os_hello.ko
+description:    Minimal Linux kernel module for OS course design
+author:         OS course design
+license:        GPL
+srcversion:     3083E606977F48F17D387F5
+depends:        
+retpoline:      Y
+name:           os_hello
+vermagic:       6.8.12-oscourse-oscourse SMP preempt mod_unload modversions 
+parm:           student:Name printed when the module is loaded (charp)
+filename:       /home/wgt/OS/05_linux_kernel_system/chardev_proc_sysfs/os_lab_driver.ko
+description:    Character device with /proc and /sys interfaces for OS course design
+author:         OS course design
+license:        GPL
+srcversion:     CD66149B3E56C5C92BFA064
+depends:        
+retpoline:      Y
+name:           os_lab_driver
+vermagic:       6.8.12-oscourse-oscourse SMP preempt mod_unload modversions 
+parm:           capacity:Character device buffer capacity in bytes (ulong)
+== syscall extension compile-only verification ==
+SYSCALL os_course_info -> OK pid=18063 user_pid=603 comm=test_os_course_ nr=462 note=pid_namespace
+ALL_TESTS_PASS
